@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyHub - Hỗ trợ học tập</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f5fb;color:#24304a;
+font-family:Arial,sans-serif}
+header{background:#5146e5;color:white;padding:25px}
+header h1{margin:0 0 8px}
+main{max-width:900px;margin:24px auto;padding:0 16px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+button{border:0;border-radius:8px;padding:10px 14px;
+background:#5146e5;color:white;cursor:pointer}
+nav button{background:white;color:#5146e5}
+nav button.active{background:#5146e5;color:white}
+.card{background:white;border-radius:14px;padding:20px;
+margin-bottom:16px;box-shadow:0 3px 14px #1725540d}
+h2{margin-top:0;font-size:20px}
+input,textarea,select{width:100%;padding:11px;margin:6px 0 12px;
+border:1px solid #d6dbea;border-radius:8px;font:inherit}
+textarea{min-height:100px;resize:vertical}
+.task{display:flex;align-items:center;gap:10px;
+border-bottom:1px solid #eee;padding:12px 0}
+.task input{width:auto;margin:0}
+.task span{flex:1;overflow-wrap:anywhere}
+.done{text-decoration:line-through;color:#8a94a8}
+.delete{background:#e74c3c;padding:7px 10px}
+.muted{color:#778198;font-size:14px}
+.timer{text-align:center;font-size:58px;font-weight:bold;
+margin:24px 0;color:#5146e5}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+.page{display:none}.page.active{display:block}
+.progress{height:10px;background:#e5e7eb;border-radius:10px;
+overflow:hidden}.bar{height:100%;width:0;background:#5146e5}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 StudyHub</h1>
+  <div>Học tập thông minh · Mỗi ngày tiến bộ hơn</div>
+</header>
+<main>
+  <nav>
+    <button class="active" data-page="tasks">📝 Bài tập</button>
+    <button data-page="timer">⏱ Pomodoro</button>
+    <button data-page="notes">📒 Ghi chú</button>
+    <button data-page="goals">🎯 Mục tiêu</button>
+  </nav>
+
+  <section id="tasks" class="page active">
+    <div class="card">
+      <h2>Thêm bài tập</h2>
+      <form id="taskForm">
+        <label>Tên bài tập</label>
+        <input id="taskName" placeholder="Ví dụ: Làm bài Toán trang 25" required>
+        <div class="row">
+          <div><label>Môn học</label>
+            <select id="subject">
+              <option>Toán</option><option>Văn</option>
+              <option>Tiếng Anh</option><option>Vật lý</option>
+              <option>Hóa học</option><option>Tin học</option>
+              <option>Môn khác</option>
+            </select>
+          </div>
+          <div><label>Hạn hoàn thành</label>
+            <input id="deadline" type="date">
+          </div>
+        </div>
+        <button>+ Thêm bài tập</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Danh sách bài tập</h2>
+      <p id="taskStats" class="muted"></p>
+      <div class="progress"><div class="bar" id="taskBar"></div></div>
+      <div id="taskList"></div>
+    </div>
+  </section>
+
+  <section id="timer" class="page">
+    <div class="card" style="text-align:center">
+      <h2>Đồng hồ tập trung</h2>
+      <p class="muted">Tập trung hết mình, nghỉ ngơi hợp lý.</p>
+      <select id="mode" style="max-width:240px">
+        <option value="25">Học tập - 25 phút</option>
+        <option value="5">Nghỉ ngắn - 5 phút</option>
+        <option value="15">Nghỉ dài - 15 phút</option>
+      </select>
+      <div class="timer" id="clock">25:00</div>
+      <p id="timerStatus">Sẵn sàng học tập!</p>
+      <button id="startTimer">▶ Bắt đầu</button>
+      <button id="resetTimer">↺ Đặt lại</button>
+    </div>
+  </section>
+
+  <section id="notes" class="page">
+    <div class="card">
+      <h2>📒 Sổ ghi chú</h2>
+      <label>Tiêu đề</label>
+      <input id="noteTitle" placeholder="Ví dụ: Công thức Toán">
+      <label>Nội dung</label>
+      <textarea id="noteContent" placeholder="Ghi lại kiến thức cần nhớ..."></textarea>
+      <button id="saveNote">Lưu ghi chú</button>
+    </div>
+    <div class="card">
+      <h2>Ghi chú đã lưu</h2>
+      <div id="noteList"></div>
+    </div>
+  </section>
+
+  <section id="goals" class="page">
+    <div class="card">
+      <h2>🎯 Mục tiêu hôm nay</h2>
+      <form id="goalForm">
+        <input id="goalName" placeholder="Ví dụ: Học 20 từ vựng tiếng Anh" required>
+        <button>Thêm mục tiêu</button>
+      </form>
+      <div id="goalList"></div>
+    </div>
+  </section>
+  <p class="muted" style="text-align:center">
+    StudyHub · Dữ liệu được lưu trên trình duyệt hiện tại.
+  </p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const load = (key, fallback=[]) => {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch { return fallback; }
+};
+const store = (key, value) =>
+  localStorage.setItem(key, JSON.stringify(value));
+
+let tasks = load("sh_tasks");
+let notes = load("sh_notes");
+let goals = load("sh_goals");
+
+document.querySelectorAll("nav button").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll("nav button").forEach(b=>
+      b.classList.toggle("active",b===btn));
+    document.querySelectorAll(".page").forEach(p=>
+      p.classList.toggle("active",p.id===btn.dataset.page));
+  };
+});
+
+function renderTasks(){
+  const completed=tasks.filter(t=>t.done).length;
+  $("taskStats").textContent=
+    `${completed}/${tasks.length} bài tập đã hoàn thành`;
+  $("taskBar").style.width=
+    (tasks.length?completed/tasks.length*100:0)+"%";
+  $("taskList").replaceChildren();
+  tasks.forEach(t=>{
+    const row=document.createElement("div");
+    row.className="task";
+    const check=document.createElement("input");
+    check.type="checkbox";check.checked=t.done;
+    check.setAttribute("aria-label","Hoàn thành");
+    check.onchange=()=>{
+      t.done=check.checked;store("sh_tasks",tasks);renderTasks();
+    };
+    const info=document.createElement("span");
+    info.className=t.done?"done":"";
+    info.textContent=`${t.name} · ${t.subject}`+
+      (t.date?` · Hạn: ${t.date}`:"");
+    const del=document.createElement("button");
+    del.className="delete";del.textContent="Xóa";
+    del.onclick=()=>{
+      tasks=tasks.filter(x=>x.id!==t.id);
+      store("sh_tasks",tasks);renderTasks();
+    };
+    row.append(check,info,del);$("taskList").append(row);
+  });
+}
+$("taskForm").onsubmit=e=>{
+  e.preventDefault();
+  tasks.push({id:Date.now(),name:$("taskName").value.trim(),
+    subject:$("subject").value,date:$("deadline").value,done:false});
+  store("sh_tasks",tasks);e.target.reset();renderTasks();
+};
+renderTasks();
+
+let remaining=1500, interval=null, running=false;
+function showClock(){
+  $("clock").textContent=
+    String(Math.floor(remaining/60)).padStart(2,"0")+":"+
+    String(remaining%60).padStart(2,"0");
+}
+function stopTimer(){
+  clearInterval(interval);interval=null;running=false;
+  $("startTimer").textContent="▶ Tiếp tục";
+}
+$("mode").onchange=()=>{
+  stopTimer();remaining=Number($("mode").value)*60;
+  $("timerStatus").textContent="Sẵn sàng học tập!";showClock();
+  $("startTimer").textContent="▶ Bắt đầu";
+};
+$("startTimer").onclick=()=>{
+  if(running){stopTimer();return;}
+  running=true;$("startTimer").textContent="⏸ Tạm dừng";
+  $("timerStatus").textContent="Đang tập trung...";
+  interval=setInterval(()=>{
+    remaining--;showClock();
+    if(remaining<=0){
+      stopTimer();remaining=0;showClock();
+      $("timerStatus").textContent="🎉 Hoàn thành! Hãy nghỉ ngơi.";
+      $("startTimer").textContent="▶ Bắt đầu lại";
+      clearInterval(interval);interval=null;
+    }
+  },1000);
+};
+$("resetTimer").onclick=()=>{
+  stopTimer();remaining=Number($("mode").value)*60;
+  showClock();$("timerStatus").textContent="Đã đặt lại.";
+  $("startTimer").textContent="▶ Bắt đầu";
+};
+showClock();
+
+function renderNotes(){
+  $("noteList").replaceChildren();
+  notes.forEach(n=>{
+    const card=document.createElement("div");
+    card.className="task";
+    const content=document.createElement("span");
+    const title=document.createElement("strong");
+    title.textContent=n.title||"Ghi chú";
+    const body=document.createElement("p");
+    body.textContent=n.content;
+    content.append(title,body);
+    const del=document.createElement("button");
+    del.className="delete";del.textContent="Xóa";
+    del.onclick=()=>{
+      notes=notes.filter(x=>x.id!==n.id);
+      store("sh_notes",notes);renderNotes();
+    };
+    card.append(content,del);$("noteList").append(card);
+  });
+}
+$("saveNote").onclick=()=>{
+  const title=$("noteTitle").value.trim();
+  const content=$("noteContent").value.trim();
+  if(!title&&!content)return;
+  notes.unshift({id:Date.now(),title,content});
+  store("sh_notes",notes);
+  $("noteTitle").value="";$("noteContent").value="";
+  renderNotes();
+};
+renderNotes();
+
+function renderGoals(){
+  $("goalList").replaceChildren();
+  goals.forEach(g=>{
+    const row=document.createElement("div");row.className="task";
+    const check=document.createElement("input");
+    check.type="checkbox";check.checked=g.done;
+    check.onchange=()=>{
+      g.done=check.checked;store("sh_goals",goals);renderGoals();
+    };
+    const text=document.createElement("span");
+    text.textContent=g.name;text.className=g.done?"done":"";
+    const del=document.createElement("button");
+    del.className="delete";del.textContent="Xóa";
+    del.onclick=()=>{
+      goals=goals.filter(x=>x.id!==g.id);
+      store("sh_goals",goals);renderGoals();
+    };
+    row.append(check,text,del);$("goalList").append(row);
+  });
+}
+$("goalForm").onsubmit=e=>{
+  e.preventDefault();
+  goals.push({id:Date.now(),name:$("goalName").value.trim(),done:false});
+  store("sh_goals",goals);$("goalName").value="";renderGoals();
+};
+renderGoals();
+</script>
+</body>
+</html>
