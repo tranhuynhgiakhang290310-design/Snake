@@ -3,281 +3,358 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StudyHub - Hỗ trợ học tập</title>
+<title>Snake Ultimate</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f2f5fb;color:#24304a;
-font-family:Arial,sans-serif}
-header{background:#5146e5;color:white;padding:25px}
-header h1{margin:0 0 8px}
-main{max-width:900px;margin:24px auto;padding:0 16px}
-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-button{border:0;border-radius:8px;padding:10px 14px;
-background:#5146e5;color:white;cursor:pointer}
-nav button{background:white;color:#5146e5}
-nav button.active{background:#5146e5;color:white}
-.card{background:white;border-radius:14px;padding:20px;
-margin-bottom:16px;box-shadow:0 3px 14px #1725540d}
-h2{margin-top:0;font-size:20px}
-input,textarea,select{width:100%;padding:11px;margin:6px 0 12px;
-border:1px solid #d6dbea;border-radius:8px;font:inherit}
-textarea{min-height:100px;resize:vertical}
-.task{display:flex;align-items:center;gap:10px;
-border-bottom:1px solid #eee;padding:12px 0}
-.task input{width:auto;margin:0}
-.task span{flex:1;overflow-wrap:anywhere}
-.done{text-decoration:line-through;color:#8a94a8}
-.delete{background:#e74c3c;padding:7px 10px}
-.muted{color:#778198;font-size:14px}
-.timer{text-align:center;font-size:58px;font-weight:bold;
-margin:24px 0;color:#5146e5}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row>*{flex:1;min-width:120px}
-.page{display:none}.page.active{display:block}
-.progress{height:10px;background:#e5e7eb;border-radius:10px;
-overflow:hidden}.bar{height:100%;width:0;background:#5146e5}
+body{margin:0;background:#0a1020;color:#eef4ff;font-family:Arial,sans-serif}
+header{text-align:center;padding:20px;background:#111c35;border-bottom:1px solid #263758}
+h1{margin:0;color:#61ffb0;letter-spacing:2px}
+header p{color:#aab8d5}
+main{max-width:900px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+button,select{cursor:pointer;border:0;border-radius:9px;padding:11px 14px;font-weight:bold}
+button{background:#243554;color:white}
+button:hover{filter:brightness(1.2)}
+button.primary{background:#55f5a5;color:#09172a}
+.tabs button.active{background:#55f5a5;color:#09172a}
+.panel{display:none}.panel.active{display:block}
+.card{background:#121d35;border:1px solid #263758;border-radius:14px;padding:18px;margin-bottom:14px}
+h2{margin-top:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#192744;padding:13px;border-radius:10px;text-align:center}
+.stat strong{display:block;font-size:24px;color:#61ffb0;margin-top:6px}
+canvas{display:block;width:min(100%,480px);height:auto;margin:auto;border:2px solid #55f5a5;border-radius:10px;background:#091526}
+.center{text-align:center}
+.muted{color:#aab8d5;font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row button{flex:1}
+.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #263758}
+.item .info{flex:1}
+.item p{margin:5px 0;color:#aab8d5;font-size:13px}
+.item button{min-width:85px}
+.swatch{width:36px;height:36px;border-radius:50%;border:2px solid white}
+input,select{padding:10px;background:#192744;color:white;border:1px solid #34486c;border-radius:8px}
+#message{min-height:24px;color:#ffd166}
+#clock{font-size:30px;color:#61ffb0;font-weight:bold}
+.controls{display:grid;grid-template-columns:repeat(3,58px);justify-content:center;gap:5px;margin-top:12px}
+.controls button{padding:13px 5px}
+.hidden{visibility:hidden}
+@media(max-width:500px){main{padding:10px}.card{padding:12px}.stat strong{font-size:20px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>📚 StudyHub</h1>
-  <div>Học tập thông minh · Mỗi ngày tiến bộ hơn</div>
+<h1>🐍 SNAKE ULTIMATE</h1>
+<p>Ăn táo · Kiếm xu · Mở skin · Chinh phục cấp độ</p>
 </header>
 <main>
-  <nav>
-    <button class="active" data-page="tasks">📝 Bài tập</button>
-    <button data-page="timer">⏱ Pomodoro</button>
-    <button data-page="notes">📒 Ghi chú</button>
-    <button data-page="goals">🎯 Mục tiêu</button>
-  </nav>
+<nav class="tabs">
+<button class="active" data-tab="play">🎮 Chơi</button>
+<button data-tab="missions">🎯 Nhiệm vụ</button>
+<button data-tab="shop">🛒 Cửa hàng</button>
+<button data-tab="skins">🎨 Skin</button>
+<button data-tab="records">🏆 Thành tích</button>
+</nav>
 
-  <section id="tasks" class="page active">
-    <div class="card">
-      <h2>Thêm bài tập</h2>
-      <form id="taskForm">
-        <label>Tên bài tập</label>
-        <input id="taskName" placeholder="Ví dụ: Làm bài Toán trang 25" required>
-        <div class="row">
-          <div><label>Môn học</label>
-            <select id="subject">
-              <option>Toán</option><option>Văn</option>
-              <option>Tiếng Anh</option><option>Vật lý</option>
-              <option>Hóa học</option><option>Tin học</option>
-              <option>Môn khác</option>
-            </select>
-          </div>
-          <div><label>Hạn hoàn thành</label>
-            <input id="deadline" type="date">
-          </div>
-        </div>
-        <button>+ Thêm bài tập</button>
-      </form>
-    </div>
-    <div class="card">
-      <h2>Danh sách bài tập</h2>
-      <p id="taskStats" class="muted"></p>
-      <div class="progress"><div class="bar" id="taskBar"></div></div>
-      <div id="taskList"></div>
-    </div>
-  </section>
+<section id="play" class="panel active">
+<div class="stats">
+<div class="stat">Điểm<strong id="score">0</strong></div>
+<div class="stat">Xu<strong id="coins">0</strong></div>
+<div class="stat">Cấp<strong id="level">1</strong></div>
+</div>
+<div class="card center">
+<canvas id="board" width="400" height="400"></canvas>
+<p id="message">Nhấn Bắt đầu để chơi!</p>
+<div class="row">
+<button class="primary" id="start">▶ Bắt đầu</button>
+<button id="pause">⏸ Tạm dừng</button>
+<button id="restart">↻ Chơi lại</button>
+</div>
+<p class="muted">Điều khiển bằng phím mũi tên hoặc WASD. Phím Space để tạm dừng.</p>
+<div class="controls">
+<button class="hidden">.</button><button data-dir="up">⬆️</button><button class="hidden">.</button>
+<button data-dir="left">⬅️</button><button data-dir="down">⬇️</button><button data-dir="right">➡️</button>
+</div>
+</div>
+<div class="card">
+<h2>⚡ Vật phẩm hỗ trợ</h2>
+<div class="row">
+<button id="shield">🛡️ Khiên (30 xu)</button>
+<button id="magnet">🧲 Nam châm (20 xu)</button>
+</div>
+<p class="muted" id="powerStatus">Chưa kích hoạt vật phẩm.</p>
+</div>
+</section>
 
-  <section id="timer" class="page">
-    <div class="card" style="text-align:center">
-      <h2>Đồng hồ tập trung</h2>
-      <p class="muted">Tập trung hết mình, nghỉ ngơi hợp lý.</p>
-      <select id="mode" style="max-width:240px">
-        <option value="25">Học tập - 25 phút</option>
-        <option value="5">Nghỉ ngắn - 5 phút</option>
-        <option value="15">Nghỉ dài - 15 phút</option>
-      </select>
-      <div class="timer" id="clock">25:00</div>
-      <p id="timerStatus">Sẵn sàng học tập!</p>
-      <button id="startTimer">▶ Bắt đầu</button>
-      <button id="resetTimer">↺ Đặt lại</button>
-    </div>
-  </section>
+<section id="missions" class="panel">
+<div class="card">
+<h2>🎯 Nhiệm vụ</h2>
+<p class="muted">Hoàn thành nhiệm vụ để nhận xu. Mỗi nhiệm vụ chỉ nhận thưởng một lần.</p>
+<div id="missionList"></div>
+</div>
+</section>
 
-  <section id="notes" class="page">
-    <div class="card">
-      <h2>📒 Sổ ghi chú</h2>
-      <label>Tiêu đề</label>
-      <input id="noteTitle" placeholder="Ví dụ: Công thức Toán">
-      <label>Nội dung</label>
-      <textarea id="noteContent" placeholder="Ghi lại kiến thức cần nhớ..."></textarea>
-      <button id="saveNote">Lưu ghi chú</button>
-    </div>
-    <div class="card">
-      <h2>Ghi chú đã lưu</h2>
-      <div id="noteList"></div>
-    </div>
-  </section>
+<section id="shop" class="panel">
+<div class="card">
+<h2>🛒 Cửa hàng vật phẩm</h2>
+<p>Xu hiện có: <strong id="shopCoins">0</strong></p>
+<div id="shopList"></div>
+</div>
+</section>
 
-  <section id="goals" class="page">
-    <div class="card">
-      <h2>🎯 Mục tiêu hôm nay</h2>
-      <form id="goalForm">
-        <input id="goalName" placeholder="Ví dụ: Học 20 từ vựng tiếng Anh" required>
-        <button>Thêm mục tiêu</button>
-      </form>
-      <div id="goalList"></div>
-    </div>
-  </section>
-  <p class="muted" style="text-align:center">
-    StudyHub · Dữ liệu được lưu trên trình duyệt hiện tại.
-  </p>
+<section id="skins" class="panel">
+<div class="card">
+<h2>🎨 Bộ sưu tập rắn</h2>
+<p class="muted">Mua skin bằng xu rồi chọn skin yêu thích.</p>
+<div id="skinList"></div>
+</div>
+</section>
+
+<section id="records" class="panel">
+<div class="card">
+<h2>🏆 Thành tích cá nhân</h2>
+<div class="stats">
+<div class="stat">Kỷ lục<strong id="best">0</strong></div>
+<div class="stat">Táo đã ăn<strong id="totalFood">0</strong></div>
+<div class="stat">Số trận<strong id="games">0</strong></div>
+</div>
+<p id="recordInfo" class="muted"></p>
+<button id="clearRecord">Xóa dữ liệu trò chơi</button>
+</div>
+</section>
 </main>
+
 <script>
-const $ = id => document.getElementById(id);
-const load = (key, fallback=[]) => {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-  catch { return fallback; }
+const $=id=>document.getElementById(id);
+const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=()=>localStorage.setItem("snakeUltimate",JSON.stringify(data));
+
+const skins=[
+{id:"green",name:"Rắn cổ điển",color:"#55f5a5",price:0},
+{id:"blue",name:"Rắn đại dương",color:"#50bfff",price:50},
+{id:"fire",name:"Rắn lửa",color:"#ff7043",price:100},
+{id:"purple",name:"Rắn vũ trụ",color:"#c084fc",price:150},
+{id:"gold",name:"Rắn hoàng kim",color:"#ffd166",price:250}
+];
+const goods=[
+{id:"shield",name:"Khiên bảo vệ",desc:"Chặn một lần va chạm chết người.",price:30},
+{id:"magnet",name:"Nam châm",desc:"Tự động hút táo trong vài lượt chơi.",price:20},
+{id:"bonus",name:"Gói xu thưởng",desc:"Nhận thêm 50 xu.",price:40}
+];
+const initial={
+coins:0,best:0,totalFood:0,games:0,
+unlocked:["green"],skin:"green",claimed:[],
+goods:{shield:0,magnet:0},level:1
 };
-const store = (key, value) =>
-  localStorage.setItem(key, JSON.stringify(value));
+let data={...initial,...read("snakeUltimate",{})};
+data.goods={...initial.goods,...data.goods};
+let snake=[],food=null,bonus=null,dx=1,dy=0;
+let score=0,eaten=0,running=false,paused=false,over=true;
+let shieldActive=false,magnetActive=false,timer=null;
+const cv=$("board"),ctx=cv.getContext("2d"),N=20,C=20;
 
-let tasks = load("sh_tasks");
-let notes = load("sh_notes");
-let goals = load("sh_goals");
-
-document.querySelectorAll("nav button").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll("nav button").forEach(b=>
-      b.classList.toggle("active",b===btn));
-    document.querySelectorAll(".page").forEach(p=>
-      p.classList.toggle("active",p.id===btn.dataset.page));
-  };
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));
+ document.querySelectorAll(".panel").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));
 });
-
-function renderTasks(){
-  const completed=tasks.filter(t=>t.done).length;
-  $("taskStats").textContent=
-    `${completed}/${tasks.length} bài tập đã hoàn thành`;
-  $("taskBar").style.width=
-    (tasks.length?completed/tasks.length*100:0)+"%";
-  $("taskList").replaceChildren();
-  tasks.forEach(t=>{
-    const row=document.createElement("div");
-    row.className="task";
-    const check=document.createElement("input");
-    check.type="checkbox";check.checked=t.done;
-    check.setAttribute("aria-label","Hoàn thành");
-    check.onchange=()=>{
-      t.done=check.checked;store("sh_tasks",tasks);renderTasks();
-    };
-    const info=document.createElement("span");
-    info.className=t.done?"done":"";
-    info.textContent=`${t.name} · ${t.subject}`+
-      (t.date?` · Hạn: ${t.date}`:"");
-    const del=document.createElement("button");
-    del.className="delete";del.textContent="Xóa";
-    del.onclick=()=>{
-      tasks=tasks.filter(x=>x.id!==t.id);
-      store("sh_tasks",tasks);renderTasks();
-    };
-    row.append(check,info,del);$("taskList").append(row);
-  });
+document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>direction(b.dataset.dir));
+document.addEventListener("keydown",e=>{
+ const map={ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
+ ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"};
+ if(map[e.key]){e.preventDefault();direction(map[e.key])}
+ if(e.code==="Space"){e.preventDefault();togglePause()}
+});
+function direction(dir){
+ if(!running||paused||over)return;
+ const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+ const [x,y]=dirs[dir];
+ if(x===-dx&&y===-dy)return;
+ dx=x;dy=y;
 }
-$("taskForm").onsubmit=e=>{
-  e.preventDefault();
-  tasks.push({id:Date.now(),name:$("taskName").value.trim(),
-    subject:$("subject").value,date:$("deadline").value,done:false});
-  store("sh_tasks",tasks);e.target.reset();renderTasks();
-};
-renderTasks();
-
-let remaining=1500, interval=null, running=false;
-function showClock(){
-  $("clock").textContent=
-    String(Math.floor(remaining/60)).padStart(2,"0")+":"+
-    String(remaining%60).padStart(2,"0");
+function randomFood(){
+ let p;
+ do{p={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)}}
+ while(snake.some(s=>s.x===p.x&&s.y===p.y));
+ return p;
 }
-function stopTimer(){
-  clearInterval(interval);interval=null;running=false;
-  $("startTimer").textContent="▶ Tiếp tục";
+function startGame(){
+ clearInterval(timer);
+ snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+ food=randomFood();bonus=null;score=0;eaten=0;dx=1;dy=0;
+ running=true;paused=false;over=false;shieldActive=false;magnetActive=false;
+ data.games++;save();updateUI();
+ $("message").textContent="Ăn táo để tăng điểm và kiếm xu!";
+ $("powerStatus").textContent="Chưa kích hoạt vật phẩm.";
+ $("start").textContent="▶ Đang chơi";
+ timer=setInterval(tick,Math.max(65,140-(data.level-1)*8));
+ draw();
 }
-$("mode").onchange=()=>{
-  stopTimer();remaining=Number($("mode").value)*60;
-  $("timerStatus").textContent="Sẵn sàng học tập!";showClock();
-  $("startTimer").textContent="▶ Bắt đầu";
-};
-$("startTimer").onclick=()=>{
-  if(running){stopTimer();return;}
-  running=true;$("startTimer").textContent="⏸ Tạm dừng";
-  $("timerStatus").textContent="Đang tập trung...";
-  interval=setInterval(()=>{
-    remaining--;showClock();
-    if(remaining<=0){
-      stopTimer();remaining=0;showClock();
-      $("timerStatus").textContent="🎉 Hoàn thành! Hãy nghỉ ngơi.";
-      $("startTimer").textContent="▶ Bắt đầu lại";
-      clearInterval(interval);interval=null;
-    }
-  },1000);
-};
-$("resetTimer").onclick=()=>{
-  stopTimer();remaining=Number($("mode").value)*60;
-  showClock();$("timerStatus").textContent="Đã đặt lại.";
-  $("startTimer").textContent="▶ Bắt đầu";
-};
-showClock();
-
-function renderNotes(){
-  $("noteList").replaceChildren();
-  notes.forEach(n=>{
-    const card=document.createElement("div");
-    card.className="task";
-    const content=document.createElement("span");
-    const title=document.createElement("strong");
-    title.textContent=n.title||"Ghi chú";
-    const body=document.createElement("p");
-    body.textContent=n.content;
-    content.append(title,body);
-    const del=document.createElement("button");
-    del.className="delete";del.textContent="Xóa";
-    del.onclick=()=>{
-      notes=notes.filter(x=>x.id!==n.id);
-      store("sh_notes",notes);renderNotes();
-    };
-    card.append(content,del);$("noteList").append(card);
-  });
+function tick(){
+ if(!running||paused||over)return;
+ const head={x:snake[0].x+dx,y:snake[0].y+dy};
+ const wall=head.x<0||head.x>=N||head.y<0||head.y>=N;
+ const eating=head.x===food.x&&head.y===food.y;
+ const hit=snake.slice(0,eating?undefined:-1).some(s=>s.x===head.x&&s.y===head.y);
+ if(wall||hit){
+  if(shieldActive){
+   shieldActive=false;$("powerStatus").textContent="🛡️ Khiên đã chặn va chạm!";
+   // Return to the previous safe position.
+   dx=0;dy=0;
+   setTimeout(()=>{if(!over){dx=1;dy=0}},250);
+   return;
+  }
+  endGame();return;
+ }
+ snake.unshift(head);
+ if(eating){
+  score+=10;eaten++;data.totalFood++;
+  data.coins+=5;
+  if(eaten%5===0){data.level++;$("message").textContent="🎉 Lên cấp "+data.level+"!"}
+  food=randomFood();
+  if(magnetActive&&eaten%3===0)food=randomFood();
+  if(Math.random()<0.15)bonus={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)};
+  if(bonus&&head.x===bonus.x&&head.y===bonus.y){score+=20;data.coins+=10;bonus=null}
+  updateUI();save();
+ }else snake.pop();
+ draw();
 }
-$("saveNote").onclick=()=>{
-  const title=$("noteTitle").value.trim();
-  const content=$("noteContent").value.trim();
-  if(!title&&!content)return;
-  notes.unshift({id:Date.now(),title,content});
-  store("sh_notes",notes);
-  $("noteTitle").value="";$("noteContent").value="";
-  renderNotes();
-};
-renderNotes();
-
-function renderGoals(){
-  $("goalList").replaceChildren();
-  goals.forEach(g=>{
-    const row=document.createElement("div");row.className="task";
-    const check=document.createElement("input");
-    check.type="checkbox";check.checked=g.done;
-    check.onchange=()=>{
-      g.done=check.checked;store("sh_goals",goals);renderGoals();
-    };
-    const text=document.createElement("span");
-    text.textContent=g.name;text.className=g.done?"done":"";
-    const del=document.createElement("button");
-    del.className="delete";del.textContent="Xóa";
-    del.onclick=()=>{
-      goals=goals.filter(x=>x.id!==g.id);
-      store("sh_goals",goals);renderGoals();
-    };
-    row.append(check,text,del);$("goalList").append(row);
-  });
+function endGame(){
+ over=true;running=false;clearInterval(timer);
+ if(score>data.best)data.best=score;
+ data.level=Math.max(1,Math.floor(data.best/100)+1);
+ save();updateUI();
+ $("message").textContent="💥 Game Over! Điểm: "+score+". Nhấn Chơi lại để thử sức!";
+ $("start").textContent="▶ Chơi lại";draw();
 }
-$("goalForm").onsubmit=e=>{
-  e.preventDefault();
-  goals.push({id:Date.now(),name:$("goalName").value.trim(),done:false});
-  store("sh_goals",goals);$("goalName").value="";renderGoals();
+function togglePause(){
+ if(over||!running)return;
+ paused=!paused;
+ $("message").textContent=paused?"⏸ Đang tạm dừng":"Tiếp tục nào!";
+ $("pause").textContent=paused?"▶ Tiếp tục":"⏸ Tạm dừng";
+ draw();
+}
+function draw(){
+ ctx.fillStyle="#091526";ctx.fillRect(0,0,400,400);
+ ctx.strokeStyle="#14253e";
+ for(let i=0;i<=N;i++){
+  ctx.beginPath();ctx.moveTo(i*C,0);ctx.lineTo(i*C,400);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,i*C);ctx.lineTo(400,i*C);ctx.stroke();
+ }
+ if(food){ctx.fillStyle="#ff5263";ctx.beginPath();ctx.arc(food.x*C+10,food.y*C+10,8,0,Math.PI*2);ctx.fill()}
+ if(bonus){ctx.fillStyle="#ffd166";ctx.font="18px Arial";ctx.fillText("★",bonus.x*C+2,bonus.y*C+18)}
+ const skin=skins.find(s=>s.id===data.skin)||skins[0];
+ snake.forEach((s,i)=>{
+  ctx.fillStyle=i===0?"#ffffff":skin.color;
+  ctx.beginPath();ctx.roundRect(s.x*C+1,s.y*C+1,18,18,5);ctx.fill();
+ });
+ if(over||paused){
+  ctx.fillStyle="#0009";ctx.fillRect(0,0,400,400);
+  ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="bold 25px Arial";
+  ctx.fillText(over?"SNAKE ULTIMATE":"TẠM DỪNG",200,190);
+  ctx.font="15px Arial";ctx.fillText(over?"Nhấn Bắt đầu để chơi":"Nhấn Space để tiếp tục",200,220);
+ }
+}
+function updateUI(){
+ $("score").textContent=score;$("coins").textContent=data.coins;
+ $("level").textContent=data.level;$("best").textContent=data.best;
+ $("totalFood").textContent=data.totalFood;$("games").textContent=data.games;
+ $("shopCoins").textContent=data.coins;
+ $("recordInfo").textContent="Skin đang dùng: "+(skins.find(s=>s.id===data.skin)?.name||"Rắn cổ điển");
+ renderMissions();renderShop();renderSkins();
+}
+function renderMissions(){
+ const list=[
+  {id:"m1",name:"Khởi đầu",desc:"Ăn 5 quả táo trong một trận.",reward:20,ok:eaten>=5},
+  {id:"m2",name:"Thợ săn táo",desc:"Ăn 10 quả táo trong một trận.",reward:40,ok:eaten>=10},
+  {id:"m3",name:"Điểm cao",desc:"Đạt 100 điểm trong một trận.",reward:50,ok:score>=100},
+  {id:"m4",name:"Chăm chỉ",desc:"Chơi ít nhất 3 trận.",reward:30,ok:data.games>=3},
+  {id:"m5",name:"Nhà sưu tập",desc:"Mở khóa ít nhất 3 skin.",reward:60,ok:data.unlocked.length>=3}
+ ];
+ $("missionList").replaceChildren();
+ list.forEach(m=>{
+  const done=data.claimed.includes(m.id);
+  const row=document.createElement("div");row.className="item";
+  const info=document.createElement("div");info.className="info";
+  const title=document.createElement("strong");title.textContent=m.name;
+  const p=document.createElement("p");p.textContent=m.desc+" Thưởng: "+m.reward+" xu";
+  info.append(title,p);
+  const btn=document.createElement("button");
+  btn.textContent=done?"Đã nhận":m.ok?"Nhận thưởng":"Chưa xong";
+  btn.disabled=done||!m.ok;
+  if(!done&&m.ok)btn.className="primary";
+  btn.onclick=()=>{data.claimed.push(m.id);data.coins+=m.reward;save();updateUI()};
+  row.append(info,btn);$("missionList").append(row);
+ });
+}
+function renderShop(){
+ $("shopList").replaceChildren();
+ goods.forEach(g=>{
+  const row=document.createElement("div");row.className="item";
+  const info=document.createElement("div");info.className="info";
+  const title=document.createElement("strong");title.textContent=g.name;
+  const p=document.createElement("p");p.textContent=g.desc+" · "+g.price+" xu";
+  info.append(title,p);
+  const btn=document.createElement("button");btn.textContent=g.id==="bonus"?"Mua":"Mua vật phẩm";
+  btn.disabled=data.coins<g.price;
+  btn.onclick=()=>{
+   if(data.coins<g.price)return;
+   data.coins-=g.price;
+   if(g.id==="bonus")data.coins+=50;else data.goods[g.id]++;
+   save();updateUI();
+  };
+  row.append(info,btn);$("shopList").append(row);
+ });
+}
+function renderSkins(){
+ $("skinList").replaceChildren();
+ skins.forEach(s=>{
+  const row=document.createElement("div");row.className="item";
+  const sw=document.createElement("div");sw.className="swatch";sw.style.background=s.color;
+  const info=document.createElement("div");info.className="info";
+  const title=document.createElement("strong");title.textContent=s.name;
+  const p=document.createElement("p");p.textContent=s.price+" xu";
+  info.append(title,p);
+  const btn=document.createElement("button");
+  const owned=data.unlocked.includes(s.id);
+  btn.textContent=data.skin===s.id?"Đang dùng":owned?"Chọn":"Mua";
+  btn.disabled=data.skin===s.id||(!owned&&data.coins<s.price);
+  btn.onclick=()=>{
+   if(!data.unlocked.includes(s.id)){
+    if(data.coins<s.price)return;
+    data.coins-=s.price;data.unlocked.push(s.id);
+   }
+   data.skin=s.id;save();updateUI();draw();
+  };
+  row.append(sw,info,btn);$("skinList").append(row);
+ });
+}
+$("start").onclick=()=>{if(over)startGame();else if(paused)togglePause()};
+$("restart").onclick=startGame;
+$("pause").onclick=togglePause;
+$("shield").onclick=()=>{
+ if(data.goods.shield>0){data.goods.shield--;shieldActive=true}
+ else if(data.coins>=30){data.coins-=30;shieldActive=true}
+ else{$("powerStatus").textContent="Bạn cần 30 xu để mua khiên.";return}
+ $("powerStatus").textContent="🛡️ Khiên đã sẵn sàng cho một va chạm.";
+ save();updateUI();
 };
-renderGoals();
+$("magnet").onclick=()=>{
+ if(data.goods.magnet>0){data.goods.magnet--;magnetActive=true}
+ else if(data.coins>=20){data.coins-=20;magnetActive=true}
+ else{$("powerStatus").textContent="Bạn cần 20 xu để mua nam châm.";return}
+ $("powerStatus").textContent="🧲 Nam châm đang hoạt động.";
+ save();updateUI();
+};
+$("clearRecord").onclick=()=>{
+ if(!confirm("Xóa toàn bộ xu, skin, nhiệm vụ và kỷ lục?"))return;
+ clearInterval(timer);localStorage.removeItem("snakeUltimate");
+ data={...initial,unlocked:["green"],goods:{shield:0,magnet:0},claimed:[]};
+ score=0;over=true;running=false;paused=false;
+ snake=[];food=null;bonus=null;
+ $("message").textContent="Dữ liệu đã xóa. Nhấn Bắt đầu để chơi!";
+ save();updateUI();draw();
+};
+updateUI();draw();
 </script>
 </body>
 </html>
